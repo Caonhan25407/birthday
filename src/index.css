@@ -1,0 +1,109 @@
+@font-face {
+  font-family: 'Mea Culpa';
+  src: url('./assets/fonts/mea-culpa/MeaCulpa-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --font-serif: 'Lora Variable', Georgia, serif;
+  --font-sans: 'Be Vietnam Pro', Arial, sans-serif;
+  --font-script: 'Dancing Script Variable', cursive;
+  --font-letter: 'Mea Culpa', 'Dancing Script Variable', cursive;
+  font-family: var(--font-serif);
+  color: #32171c;
+  background: #341d1a;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --burgundy: #740b21;
+  --burgundy-deep: #4e0716;
+  --burgundy-bright: #9f2542;
+  --blush: #f8cbd9;
+  --blush-light: #fff1f5;
+  --cream: #fff8ec;
+  --ink: #32171c;
+  --lavender: #afa6c1;
+  --lavender-light: #c7bed3;
+  --gold: #d8ad62;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: #341d1a;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100svh;
+  overflow: hidden;
+  background:
+    linear-gradient(30deg, rgba(255, 255, 255, 0.025) 12%, transparent 12.5%, transparent 87%, rgba(255, 255, 255, 0.025) 87.5%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.025) 12%, transparent 12.5%, transparent 87%, rgba(255, 255, 255, 0.025) 87.5%),
+    linear-gradient(30deg, rgba(255, 255, 255, 0.025) 12%, transparent 12.5%, transparent 87%, rgba(255, 255, 255, 0.025) 87.5%),
+    #341d1a;
+  background-position: 0 0, 0 0, 22px 38px;
+  background-size: 44px 76px;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #f5bf69;
+  outline-offset: 3px;
+}
+
+#root {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: clamp(0px, 2.4vw, 28px);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 760px) {
+  #root {
+    padding: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}
