@@ -66,8 +66,9 @@ button {
 
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid #f5bf69;
+  outline: 3px solid #fff8ef;
   outline-offset: 3px;
+  box-shadow: 0 0 0 5px #4e0716;
 }
 
 #root {
@@ -90,6 +91,12 @@ a:focus-visible {
 }
 
 @media (max-width: 760px) {
+  #root {
+    padding: 0;
+  }
+}
+
+@media (min-width: 761px) and (max-height: 620px) {
   #root {
     padding: 0;
   }

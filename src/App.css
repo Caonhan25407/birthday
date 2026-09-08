@@ -1,7 +1,7 @@
 .page-frame {
   width: min(1500px, 100%);
   height: min(900px, calc(100svh - 56px));
-  min-height: min(620px, 100svh);
+  min-height: 0;
   display: grid;
   grid-template-rows: 58px minmax(0, 1fr) 28px;
   overflow: hidden;
@@ -165,8 +165,9 @@
 }
 
 .scene:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: -3px;
+  outline: 3px solid #fff8ef;
+  outline-offset: -4px;
+  box-shadow: inset 0 0 0 6px var(--burgundy-deep);
 }
 
 .scene:focus:not(:focus-visible) {
@@ -705,7 +706,7 @@
 
 .message-envelope-wrap .eyebrow {
   margin-bottom: 28px;
-  color: rgba(61, 18, 39, 0.68);
+  color: var(--burgundy-deep);
   font-family: var(--font-script);
   font-size: clamp(20px, 2vw, 24px);
   font-weight: 500;
@@ -937,14 +938,14 @@
     linear-gradient(rgba(255, 254, 247, 0.92), rgba(255, 250, 239, 0.97)),
     repeating-linear-gradient(0deg, transparent 0 26px, rgba(100, 24, 41, 0.05) 26px 27px);
   box-shadow: inset 0 0 40px rgba(153, 82, 77, 0.08);
-  font-family: var(--font-letter);
-  text-align: center;
+  font-family: var(--font-serif);
+  text-align: left;
 }
 
 .letter-card p {
   margin: 0 0 10px;
-  font-size: 26px;
-  line-height: 1.28;
+  font-size: 16px;
+  line-height: 1.65;
   opacity: 0;
   animation: letterLine 520ms forwards;
 }
@@ -975,19 +976,27 @@
 
 .letter-salutation {
   color: var(--burgundy);
+  font-family: var(--font-letter);
   font-size: 38px !important;
+  line-height: 1.15 !important;
 }
 
 .letter-wish {
   margin-top: 3px !important;
   color: var(--burgundy);
+  font-family: var(--font-letter);
   font-size: 29px !important;
   font-weight: 400;
+  line-height: 1.2 !important;
+  text-align: center;
 }
 
 .letter-signoff {
   margin: 2px 0 0 !important;
+  font-family: var(--font-letter);
   font-size: 28px !important;
+  line-height: 1.2 !important;
+  text-align: right;
 }
 
 .paper-tape {
@@ -1079,66 +1088,162 @@
 }
 
 .wish-note {
-  width: 226px;
-  min-height: 78px;
+  --note-angle: 0deg;
+  --note-enter-angle: -12deg;
+  --note-enter-x: 0px;
+  --note-enter-y: -80px;
+  --note-delay: 180ms;
+  --note-float-duration: 4.8s;
+  width: 284px;
+  aspect-ratio: 856 / 535;
   margin: 0;
-  padding: 15px 19px;
+  padding: 0;
   position: absolute;
   z-index: 4;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 6px;
   color: #571629;
-  background: #f7d7e2;
-  box-shadow: 0 12px 22px rgba(35, 2, 9, 0.2);
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.4;
-  text-align: center;
   opacity: 0;
-  animation: noteIn 550ms forwards;
+  transform-origin: 50% 55%;
+  isolation: isolate;
+  animation: noteScatterIn 880ms var(--note-delay) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.wish-note::before,
+.wish-note::after {
+  position: absolute;
+  z-index: 3;
+  color: #ffe087;
+  opacity: 0;
+  pointer-events: none;
+  text-shadow: 0 0 12px rgba(255, 224, 135, 0.8);
+  animation: noteSparkle 2.2s calc(var(--note-delay) + 900ms) ease-in-out infinite;
 }
 
 .wish-note::before {
-  content: '';
-  width: 44px;
-  height: 14px;
+  content: '✦';
+  top: 8%;
+  right: 15%;
+  font-size: 19px;
+}
+
+.wish-note::after {
+  content: '♡';
+  right: 2%;
+  bottom: 12%;
+  color: #ffb1c9;
+  font-size: 21px;
+  animation-delay: calc(var(--note-delay) + 1.55s);
+}
+
+.wish-note__card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-origin: 48% 52%;
+  will-change: transform;
+  animation: noteFloat var(--note-float-duration) calc(var(--note-delay) + 900ms) ease-in-out infinite;
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wish-note__paper {
+  width: 100%;
+  height: 100%;
   position: absolute;
-  top: -8px;
-  left: 50%;
-  background: rgba(255, 239, 198, 0.72);
-  transform: translateX(-50%) rotate(-2deg);
+  inset: 0;
+  z-index: 1;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 16px rgba(35, 2, 9, 0.24));
+  transition: filter 260ms ease;
+  pointer-events: none;
+  user-select: none;
+}
+
+.wish-note__content {
+  width: 76%;
+  height: 65%;
+  margin: 0;
+  position: absolute;
+  top: 18%;
+  left: 11%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  color: #651b32;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.34;
+  text-align: center;
+  text-wrap: balance;
+  transform: rotate(-0.5deg);
+}
+
+.wish-note__heart {
+  flex: 0 0 auto;
+  color: #a2123d;
+  filter: drop-shadow(0 2px 3px rgba(93, 13, 38, 0.2));
+  transform-origin: center;
+  animation: noteHeartBeat 1.7s calc(var(--note-delay) + 1.05s) ease-in-out infinite;
 }
 
 .wish-note--1 {
-  top: 80px;
-  left: 2%;
-  transform: rotate(-2deg);
-  animation-delay: 260ms;
+  --note-angle: -3deg;
+  --note-enter-angle: -18deg;
+  --note-enter-x: -110px;
+  --note-enter-y: -75px;
+  --note-delay: 180ms;
+  --note-float-duration: 4.6s;
+  top: 62px;
+  left: 0;
 }
 
 .wish-note--2 {
-  top: 80px;
-  right: 2%;
-  transform: rotate(2deg);
-  animation-delay: 380ms;
+  --note-angle: 2.5deg;
+  --note-enter-angle: 17deg;
+  --note-enter-x: 110px;
+  --note-enter-y: -75px;
+  --note-delay: 310ms;
+  --note-float-duration: 5.2s;
+  top: 62px;
+  right: 0;
 }
 
 .wish-note--3 {
-  bottom: 100px;
-  left: 3%;
-  transform: rotate(1deg);
-  animation-delay: 500ms;
+  --note-angle: 2deg;
+  --note-enter-angle: 16deg;
+  --note-enter-x: -110px;
+  --note-enter-y: 75px;
+  --note-delay: 440ms;
+  --note-float-duration: 4.9s;
+  bottom: 62px;
+  left: 1%;
 }
 
 .wish-note--4 {
-  right: 3%;
-  bottom: 100px;
-  transform: rotate(-1.5deg);
-  animation-delay: 620ms;
+  --note-angle: -2.5deg;
+  --note-enter-angle: -17deg;
+  --note-enter-x: 110px;
+  --note-enter-y: 75px;
+  --note-delay: 570ms;
+  --note-float-duration: 5.5s;
+  right: 1%;
+  bottom: 62px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .wish-note:hover {
+    z-index: 6;
+  }
+
+  .wish-note:hover .wish-note__card {
+    animation: none;
+    transform: translateY(-13px) rotate(0deg) scale(1.075);
+  }
+
+  .wish-note:hover .wish-note__paper {
+    filter: drop-shadow(0 24px 22px rgba(35, 2, 9, 0.34)) brightness(1.035);
+  }
 }
 
 .bouquet-caption {
@@ -1398,6 +1503,10 @@
   font-size: 19px;
   font-weight: 500;
   line-height: 1.3;
+}
+
+.gallery-mobile-note {
+  display: none;
 }
 
 .gallery-album {
@@ -2024,15 +2133,18 @@
 @keyframes bouquetSway {
   0%,
   100% {
-    rotate: 0deg;
+    translate: 0 0;
+    rotate: -0.45deg;
   }
 
   35% {
-    rotate: 0.55deg;
+    translate: 0 -5px;
+    rotate: 1.2deg;
   }
 
   70% {
-    rotate: -0.4deg;
+    translate: 0 -2px;
+    rotate: -1deg;
   }
 }
 
@@ -2056,14 +2168,72 @@
   }
 }
 
-@keyframes noteIn {
-  from {
+@keyframes noteScatterIn {
+  0% {
     opacity: 0;
-    scale: 0.9;
+    transform: translate3d(var(--note-enter-x), var(--note-enter-y), 0)
+      rotate(var(--note-enter-angle)) scale(0.62);
   }
-  to {
+
+  68% {
     opacity: 1;
-    scale: 1;
+    transform: translate3d(0, -10px, 0) rotate(0deg) scale(1.08);
+  }
+
+  84% {
+    opacity: 1;
+    transform: translate3d(0, 5px, 0) rotate(var(--note-angle)) scale(0.97);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(var(--note-angle)) scale(1);
+  }
+}
+
+@keyframes noteFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.7deg) scale(1);
+  }
+
+  50% {
+    transform: translateY(-11px) rotate(0.9deg) scale(1.018);
+  }
+}
+
+@keyframes noteSparkle {
+  0%,
+  28%,
+  100% {
+    opacity: 0;
+    transform: translateY(5px) rotate(-12deg) scale(0.45);
+  }
+
+  48%,
+  66% {
+    opacity: 1;
+    transform: translateY(0) rotate(8deg) scale(1.12);
+  }
+}
+
+@keyframes noteHeartBeat {
+  0%,
+  62%,
+  100% {
+    transform: scale(1);
+  }
+
+  72% {
+    transform: scale(1.35) rotate(-7deg);
+  }
+
+  82% {
+    transform: scale(0.92);
+  }
+
+  90% {
+    transform: scale(1.18) rotate(5deg);
   }
 }
 
@@ -2299,8 +2469,11 @@
   }
 
   .wish-note {
-    width: 200px;
-    font-size: 12px;
+    width: 198px;
+  }
+
+  .wish-note__content {
+    font-size: 11.5px;
   }
 
   .bouquet-main {
@@ -2413,7 +2586,7 @@
   }
 
   .cake-collage {
-    height: min(420px, calc(100svh - 315px));
+    height: clamp(220px, calc(100svh - 315px), 420px);
     min-height: 0;
     margin-bottom: 0;
   }
@@ -2494,6 +2667,16 @@
   .intro-decoration--bunny-white,
   .intro-decoration--bunny-plush {
     bottom: 8px;
+  }
+}
+
+@media (min-width: 761px) and (max-height: 620px) {
+  .page-frame {
+    width: 100%;
+    height: 100svh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 }
 
@@ -2764,9 +2947,9 @@
   }
 
   .letter-card p {
-    margin-bottom: 14px;
-    font-size: 23px;
-    line-height: 1.32;
+    margin-bottom: 12px;
+    font-size: 16px;
+    line-height: 1.65;
   }
 
   .letter-salutation {
@@ -2810,20 +2993,35 @@
 
   .wish-note {
     width: 100%;
-    min-height: 96px;
+    min-height: 0;
     position: relative;
     top: auto;
     right: auto;
     bottom: auto;
     left: auto;
-    font-size: 12px;
+  }
+
+  .wish-note__content {
+    gap: 5px;
+    font-size: 10.5px;
+    line-height: 1.2;
+  }
+
+  .wish-note__heart {
+    width: 12px;
+    height: 12px;
   }
 
   .wish-note--1,
+  .wish-note--3 {
+    --note-enter-x: -64px;
+    --note-enter-y: 54px;
+  }
+
   .wish-note--2,
-  .wish-note--3,
   .wish-note--4 {
-    transform: none;
+    --note-enter-x: 64px;
+    --note-enter-y: 54px;
   }
 
   .bouquet-caption {
@@ -2884,6 +3082,33 @@
   .gallery-heading p {
     max-width: 310px;
     font-size: 18px;
+  }
+
+  .gallery-mobile-note {
+    width: min(390px, 100%);
+    margin: 10px auto 0;
+    padding: 9px 14px 10px;
+    display: block;
+    border: 1px solid rgba(116, 11, 33, 0.18);
+    border-radius: 6px;
+    color: #4e0716;
+    background: rgba(255, 248, 236, 0.72);
+    box-shadow: 0 8px 18px rgba(68, 18, 35, 0.08);
+    text-align: center;
+  }
+
+  .gallery-mobile-note p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .gallery-mobile-note__title {
+    margin-bottom: 2px !important;
+    font-family: var(--font-script);
+    font-size: 20px !important;
+    font-weight: 600;
+    line-height: 1.2 !important;
   }
 
   .gallery-album {
@@ -3007,6 +3232,69 @@
   }
 }
 
+@media (max-width: 480px) {
+  .menu-view {
+    padding-top: 24px;
+  }
+
+  .menu-view .section-heading h1 {
+    font-size: 36px;
+  }
+
+  .menu-view .section-heading p {
+    margin-top: 2px;
+    font-size: 17px;
+  }
+
+  .surprise-grid {
+    margin-top: 14px;
+    gap: 8px;
+  }
+
+  .surprise-choice {
+    min-height: 104px;
+    padding: 4px 10px;
+    display: grid;
+    grid-template-columns: minmax(92px, 36%) minmax(0, 1fr);
+    grid-template-rows: 1fr 1fr;
+    column-gap: 10px;
+    border: 1px solid rgba(255, 248, 239, 0.15);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .surprise-choice__art {
+    width: 100%;
+    height: 96px;
+    grid-row: 1 / -1;
+  }
+
+  .surprise-choice__art::after {
+    bottom: 9px;
+  }
+
+  .surprise-choice__label {
+    grid-column: 2;
+    align-self: end;
+    justify-self: start;
+    margin-top: 0;
+    font-size: 24px;
+  }
+
+  .surprise-choice__sub {
+    grid-column: 2;
+    align-self: start;
+    justify-self: start;
+    margin-top: 3px;
+    font-size: 13px;
+    text-align: left;
+  }
+
+  .menu-view .back-button {
+    margin-top: 14px;
+  }
+}
+
 @media (max-width: 380px) {
   .topbar {
     padding: 0 10px;
@@ -3048,8 +3336,16 @@
   }
 
   .wish-note {
+    width: min(240px, 100%);
     grid-column: 1 / -1;
-    min-height: 72px;
+    justify-self: center;
+    min-height: 0;
+  }
+
+  .wish-note__content {
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.25;
   }
 
   .bouquet-caption {
@@ -3160,6 +3456,73 @@
     right: -40px;
     bottom: -18px;
   }
+
+  .gallery-view {
+    padding: 14px 12px 18px;
+  }
+
+  .gallery-heading > svg {
+    display: none;
+  }
+
+  .gallery-heading h1 {
+    font-size: 32px;
+  }
+
+  .gallery-heading p {
+    margin-top: 0;
+    font-size: 15px;
+  }
+
+  .gallery-mobile-note {
+    margin-top: 6px;
+    padding: 6px 10px 7px;
+  }
+
+  .gallery-mobile-note p {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .gallery-mobile-note__title {
+    font-size: 18px !important;
+  }
+
+  .gallery-album {
+    margin-top: 8px;
+    margin-bottom: 6px;
+  }
+
+  .gallery-page-stage {
+    min-height: 286px;
+  }
+
+  .gallery-photo-sheet {
+    padding: 12px;
+  }
+
+  .gallery-polaroid {
+    width: min(220px, 100%);
+    padding: 8px 8px 50px;
+  }
+
+  .gallery-caption {
+    bottom: 11px;
+    font-size: 14px;
+  }
+
+  .gallery-navigation {
+    min-height: 44px;
+  }
+
+  .gallery-navigation__button {
+    min-height: 44px;
+  }
+
+  .gallery-flip-hint {
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
 }
 
 @keyframes bouquetBloomMobile {
@@ -3170,5 +3533,30 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bouquet-main,
+  .wish-note,
+  .wish-note__card,
+  .wish-note__heart,
+  .wish-note::before,
+  .wish-note::after {
+    animation: none;
+  }
+
+  .wish-note {
+    opacity: 1;
+    transform: rotate(var(--note-angle));
+  }
+
+  .wish-note__card {
+    transform: none;
+  }
+
+  .wish-note::before,
+  .wish-note::after {
+    opacity: 0.72;
   }
 }

@@ -99,6 +99,8 @@ test('birthday card completes every interactive scene', async ({ page }, testInf
   await page.getByRole('button', { name: 'Quay lại chọn bất ngờ' }).click()
   await page.getByRole('button', { name: 'Xem bó hoa' }).click()
   await expect(page.getByRole('heading', { name: 'Flowers for You' })).toBeVisible()
+  await expect(page.locator('.wish-note')).toHaveCount(4)
+  await expect(page.locator('.wish-note__paper')).toHaveCount(4)
   await settleScene(page)
   await page.screenshot({ path: testInfo.outputPath('05-flowers.png') })
 
@@ -126,16 +128,59 @@ test('birthday card completes every interactive scene', async ({ page }, testInf
   await settleScene(page)
   await page.screenshot({ path: testInfo.outputPath('08-gallery.png') })
 
-  const musicButton = page.getByRole('button', { name: 'Nhạc nền' })
-  await musicButton.click()
-  await expect(musicButton).toHaveAttribute('aria-pressed', 'true')
-  await musicButton.click()
-  await expect(musicButton).toHaveAttribute('aria-pressed', 'false')
-
   expect(consoleErrors).toEqual([])
 })
 
-test('letter appears only after the envelope opens', async ({ page }, testInfo) => {
+test('flower notes use illustrated paper and respect motion preferences', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Mở thiệp sinh nhật' }).click()
+  await page.getByRole('button', { name: 'Xem bó hoa' }).click()
+
+  const notes = page.locator('.wish-note')
+  const paperImages = page.locator('.wish-note__paper')
+  await expect(notes).toHaveCount(4)
+  await expect(paperImages).toHaveCount(4)
+
+  const paperStates = await paperImages.evaluateAll((images: HTMLImageElement[]) =>
+    images.map((image) => ({
+      complete: image.complete,
+      naturalWidth: image.naturalWidth,
+      naturalHeight: image.naturalHeight,
+      src: image.currentSrc || image.src,
+    })),
+  )
+  expect(paperStates.every(({ complete, naturalWidth, naturalHeight }) =>
+    complete && naturalWidth > 0 && naturalHeight > 0,
+  )).toBe(true)
+  expect(new Set(paperStates.map(({ src }) => src)).size).toBe(1)
+
+  const motion = await notes.first().evaluate((note) => {
+    const revealStyle = getComputedStyle(note)
+    const card = note.querySelector<HTMLElement>('.wish-note__card')
+    const floatStyle = card ? getComputedStyle(card) : null
+    return {
+      revealName: revealStyle.animationName,
+      revealDuration: Number.parseFloat(revealStyle.animationDuration),
+      floatName: floatStyle?.animationName ?? '',
+      floatIterations: floatStyle?.animationIterationCount ?? '',
+    }
+  })
+  expect(motion.revealName).toContain('noteScatterIn')
+  expect(motion.revealDuration).toBeGreaterThanOrEqual(0.8)
+  expect(motion.floatName).toContain('noteFloat')
+  expect(motion.floatIterations).toBe('infinite')
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect
+    .poll(() => notes.first().evaluate((note) => getComputedStyle(note).animationName))
+    .toBe('none')
+  await expect
+    .poll(() => notes.first().locator('.wish-note__card').evaluate((card) => getComputedStyle(card).animationName))
+    .toBe('none')
+})
+
+test('letter appears only after the envelope opens', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: 'Mở thiệp sinh nhật' }).click()
   await page.getByRole('button', { name: 'Mở lời nhắn' }).click()
@@ -146,15 +191,7 @@ test('letter appears only after the envelope opens', async ({ page }, testInfo) 
   await expect(openButton).toBeDisabled()
   await expect(openButton).toHaveClass(/is-opening/)
   await expect(page.locator('.letter-view')).toHaveCount(0)
-
-  await page.waitForTimeout(260)
-  await page.screenshot({ path: testInfo.outputPath('envelope-flap-opening.png') })
-
-  await page.waitForTimeout(460)
-  await expect(page.locator('.message-letter-preview')).toBeVisible()
-  await page.screenshot({ path: testInfo.outputPath('envelope-opening.png') })
-
-  await expect(page.getByText('Người thương à,')).toBeVisible()
+  await expect(page.getByText('Người thương à,')).toBeVisible({ timeout: 2500 })
 })
 
 test('wish papers rise before they fall', async ({ page }, testInfo) => {
@@ -216,6 +253,7 @@ test('gift appears after four seconds and only opens the gallery when clicked', 
 
   await giftButton.click()
   await expect(galleryHeading).toBeVisible()
+  await expect(page.getByRole('group', { name: 'Điều khiển album' })).toBeVisible()
 })
 
 test('reduced motion reveals the gift immediately without confetti', async ({ page }) => {
@@ -251,6 +289,37 @@ test('leaving the cake cancels the pending gift timer', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Our Little Memories' })).toHaveCount(0)
 })
 
+test('reselecting the active cake view keeps the pending gift timer alive', async ({ page }) => {
+  const initialTime = new Date('2026-08-25T00:00:00Z')
+  await page.clock.install({ time: initialTime })
+  const wishButton = await openCake(page)
+  await page.clock.pauseAt(new Date(initialTime.getTime() + 60_000))
+
+  await wishButton.click()
+  const mobileMenuButton = page.getByRole('button', { name: 'Mở menu' })
+  if (await mobileMenuButton.isVisible()) await mobileMenuButton.click()
+  await page.locator('#birthday-navigation button[aria-current="page"]').click()
+
+  await page.clock.runFor(4000)
+  await expect(page.getByRole('button', { name: 'Mở hộp quà kỷ niệm' })).toBeVisible()
+  await expect(page.locator('.confetti i')).toHaveCount(0)
+})
+
+test('initial keyboard focus starts with the header controls', async ({ page }) => {
+  await page.goto('/')
+
+  expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('BODY')
+  await page.keyboard.press('Tab')
+  await expect(page.locator('.brand')).toBeFocused()
+})
+
+test('birthday card has no background music or audio control', async ({ page }) => {
+  await page.goto('/')
+
+  await expect(page.getByRole('button', { name: /nhạc nền/i })).toHaveCount(0)
+  await expect(page.locator('audio, video')).toHaveCount(0)
+})
+
 test('gallery turns through every loaded photo with page, controls, and keyboard', async ({ page }) => {
   await openGallery(page)
 
@@ -263,7 +332,7 @@ test('gallery turns through every loaded photo with page, controls, and keyboard
   const imageSources = new Set<string>()
   const totalPages = await progressDots.count()
 
-  expect(totalPages).toBeGreaterThan(1)
+  expect(totalPages).toBe(8)
   await expect(progress).toHaveText(`1 / ${totalPages}`)
   await expect(previousButton).toBeDisabled()
   await expect(nextButton).toBeEnabled()

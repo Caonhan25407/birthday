@@ -7,11 +7,25 @@ const viewports = [
   { name: 'breakpoint', width: 760, height: 900 },
   { name: 'mobile', width: 390, height: 844 },
   { name: 'mobile-small', width: 320, height: 568 },
+  { name: 'mobile-landscape', width: 844, height: 390 },
 ]
 
 async function settle(page: Page) {
-  await page.waitForTimeout(120)
   await page.evaluate(() => document.fonts.ready)
+  await page.locator('img').evaluateAll(async (images) => {
+    const visibleImages = images.filter((image) => image.getClientRects().length > 0)
+    await Promise.all(
+      visibleImages.map(async (image) => {
+        if (!image.complete) {
+          await new Promise<void>((resolve) => {
+            image.addEventListener('load', () => resolve(), { once: true })
+            image.addEventListener('error', () => resolve(), { once: true })
+          })
+        }
+        if (image.naturalWidth > 0) await image.decode().catch(() => undefined)
+      }),
+    )
+  })
 }
 
 async function auditScene(page: Page, viewportName: string, sceneName: string, testInfo: TestInfo) {
@@ -31,8 +45,12 @@ async function auditScene(page: Page, viewportName: string, sceneName: string, t
     if (frameRect.left < -1 || frameRect.right > window.innerWidth + 1) {
       problems.push(`Page frame exceeds viewport horizontally: ${frameRect.left}..${frameRect.right}`)
     }
+    if (frameRect.top < -1 || frameRect.bottom > window.innerHeight + 1) {
+      problems.push(`Page frame exceeds viewport vertically: ${frameRect.top}..${frameRect.bottom}`)
+    }
 
     document.querySelectorAll<HTMLImageElement>('img').forEach((image) => {
+      if (image.getClientRects().length === 0) return
       if (!image.complete || image.naturalWidth === 0 || image.naturalHeight === 0) {
         problems.push(`Broken image: ${image.className || image.alt || image.src}`)
       }
@@ -49,7 +67,9 @@ async function auditScene(page: Page, viewportName: string, sceneName: string, t
       const labelRect = label.getBoundingClientRect()
       const subtitleRect = subtitle.getBoundingClientRect()
       const visibleImageBottom = artRect ? Math.min(imageRect.bottom, artRect.bottom) : imageRect.bottom
-      if (visibleImageBottom > labelRect.top + 1) {
+      const imageAndLabelShareColumns =
+        imageRect.left < labelRect.right && imageRect.right > labelRect.left
+      if (imageAndLabelShareColumns && visibleImageBottom > labelRect.top + 1) {
         problems.push(`Surprise ${index + 1} image overlaps its label by ${visibleImageBottom - labelRect.top}px`)
       }
       if (labelRect.bottom > subtitleRect.top + 1) {
@@ -153,6 +173,13 @@ async function auditScene(page: Page, viewportName: string, sceneName: string, t
   return issues.map((issue) => `${viewportName}/${sceneName}: ${issue}`)
 }
 
+test.beforeEach(({ page: _page }, testInfo) => {
+  test.skip(
+    testInfo.project.name !== 'desktop-chrome',
+    'This suite supplies its own desktop, tablet, and mobile viewport matrix.',
+  )
+})
+
 test('all layouts, elements, and text remain healthy', async ({ page }, testInfo) => {
   test.setTimeout(180_000)
   await page.emulateMedia({ reducedMotion: 'reduce' })
@@ -240,6 +267,11 @@ test('mobile navigation manages visibility, focus, and current page', async ({ p
   await expect(navigation).toHaveCSS('visibility', 'hidden')
   await expect(toggle).toBeFocused()
   await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+
+  await toggle.click()
+  await expect(navigation.locator('button').first()).toBeFocused()
+  await page.keyboard.press('Shift+Tab')
+  await expect(navigation).toHaveCSS('visibility', 'hidden')
 })
 
 test('new scenes start at the top after navigating from scrolled content', async ({ page }) => {

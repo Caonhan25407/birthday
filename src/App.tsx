@@ -9,15 +9,21 @@ import {
   Images,
   Mail,
   Menu,
-  Music2,
   Sparkles,
-  Volume2,
-  VolumeX,
   X,
 } from 'lucide-react'
 import bouquetImage from './assets/bouquet.webp'
 import cakeImage from './assets/cake.webp'
 import cakeCollageImage from './assets/cake-collage.webp'
+import flowerNoteImage from './assets/flower-note.webp'
+import galleryImage01 from './assets/pic/01.webp'
+import galleryImage02 from './assets/pic/02.webp'
+import galleryImage03 from './assets/pic/03.webp'
+import galleryImage04 from './assets/pic/04.webp'
+import galleryImage05 from './assets/pic/05.webp'
+import galleryImage06 from './assets/pic/06.webp'
+import galleryImage07 from './assets/pic/07.webp'
+import galleryImage08 from './assets/pic/08.webp'
 import introBunnyPlushImage from './assets/intro-bunny-plush-cutout.webp'
 import introBunnyWhiteImage from './assets/intro-bunny-white-cutout.webp'
 import introGiftImage from './assets/intro-gift-cutout.webp'
@@ -28,11 +34,6 @@ import introRosesWhiteImage from './assets/intro-roses-white-cutout.webp'
 import introTulipEnvelopeImage from './assets/intro-tulip-envelope-cutout.webp'
 import messageEnvelopeImage from './assets/message-envelope.webp'
 import './App.css'
-
-const galleryPhotoModules = import.meta.glob(
-  ['./assets/pic/*.{png,PNG,jpg,JPG,jpeg,JPEG}', '!./assets/pic/9.JPG'],
-  { eager: true, query: '?url', import: 'default' },
-) as Record<string, string>
 
 type View =
   | 'intro'
@@ -67,26 +68,53 @@ const flowerNotes = [
   'Bạn xứng đáng với mọi điều dịu dàng trên đời.',
 ]
 
-const galleryCaptions = [
-  'Ngày ấy, bé xíu và thật đáng yêu.',
-  'Lớn thêm một chút, vẫn nguyên nét hồn nhiên.',
-  'Nụ cười này, mình luôn muốn ngắm nhìn.',
-  'Một chút tinh nghịch của hôm nay.',
-  'Một ngày nắng đẹp và một dáng pose thật xinh.',
-  'Một chút tập trung, một chút đáng yêu.',
-  'Nụ cười dưới nắng, rực rỡ như tuổi trẻ.',
-]
+const galleryNote = {
+  title: 'Gửi bạn của hôm nay,',
+  text: 'Mong bạn luôn giữ được nét hồn nhiên ấy, và mỗi tuổi mới đều có thêm thật nhiều niềm vui.',
+}
 
-const galleryMemories = Object.entries(galleryPhotoModules)
-  .sort(([firstPath], [secondPath]) =>
-    firstPath.localeCompare(secondPath, 'vi', { numeric: true, sensitivity: 'base' }),
-  )
-  .map(([path, src], index) => ({
-    src,
-    alt: `Ảnh kỷ niệm ${index + 1} của người nhận thiệp`,
-    caption: galleryCaptions[index] ?? 'Một khoảnh khắc thật đáng nhớ.',
-    path,
-  }))
+const galleryMemories = [
+  {
+    src: galleryImage01,
+    alt: 'Ảnh kỷ niệm 1 của người nhận thiệp',
+    caption: 'Ngày ấy, bé xíu và thật đáng yêu.',
+  },
+  {
+    src: galleryImage02,
+    alt: 'Ảnh kỷ niệm 2 của người nhận thiệp',
+    caption: 'Lớn thêm một chút, vẫn nguyên nét hồn nhiên.',
+  },
+  {
+    src: galleryImage03,
+    alt: 'Ảnh kỷ niệm 3 của người nhận thiệp',
+    caption: 'Nụ cười này, mình luôn muốn ngắm nhìn.',
+  },
+  {
+    src: galleryImage04,
+    alt: 'Ảnh kỷ niệm 4 của người nhận thiệp',
+    caption: 'Một chút tinh nghịch của hôm nay.',
+  },
+  {
+    src: galleryImage05,
+    alt: 'Ảnh kỷ niệm 5 của người nhận thiệp',
+    caption: 'Một ngày nắng đẹp và một dáng pose thật xinh.',
+  },
+  {
+    src: galleryImage06,
+    alt: 'Ảnh kỷ niệm 6 của người nhận thiệp',
+    caption: 'Một chút tập trung, một chút đáng yêu.',
+  },
+  {
+    src: galleryImage07,
+    alt: 'Ảnh kỷ niệm 7 của người nhận thiệp',
+    caption: 'Một khoảnh khắc bên nhau thật dịu dàng.',
+  },
+  {
+    src: galleryImage08,
+    alt: 'Ảnh kỷ niệm 8 của người nhận thiệp',
+    caption: 'Những ngày cùng nhau luôn thật đáng nhớ.',
+  },
+] as const
 
 type GalleryFlip = {
   direction: 'next' | 'previous'
@@ -94,6 +122,16 @@ type GalleryFlip = {
 }
 
 const WISH_TO_GIFT_DELAY_MS = 4000
+
+const prefersReducedMotion = () =>
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+function preloadImage(src: string) {
+  const image = new Image()
+  image.decoding = 'async'
+  image.src = src
+  void image.decode().catch(() => undefined)
+}
 
 const confetti = Array.from({ length: 78 }, (_, index) => {
   const direction = index % 2 === 0 ? -1 : 1
@@ -122,55 +160,6 @@ const confetti = Array.from({ length: 78 }, (_, index) => {
   }
 })
 
-const melody: Array<[number, number]> = [
-  [392, 0.28],
-  [392, 0.2],
-  [440, 0.48],
-  [392, 0.48],
-  [523.25, 0.48],
-  [493.88, 0.8],
-  [392, 0.28],
-  [392, 0.2],
-  [440, 0.48],
-  [392, 0.48],
-  [587.33, 0.48],
-  [523.25, 0.8],
-  [392, 0.28],
-  [392, 0.2],
-  [783.99, 0.48],
-  [659.25, 0.48],
-  [523.25, 0.48],
-  [493.88, 0.48],
-  [440, 0.8],
-  [698.46, 0.28],
-  [698.46, 0.2],
-  [659.25, 0.48],
-  [523.25, 0.48],
-  [587.33, 0.48],
-  [523.25, 0.9],
-]
-
-function scheduleMelody(context: AudioContext) {
-  let cursor = context.currentTime + 0.08
-
-  melody.forEach(([frequency, duration]) => {
-    const oscillator = context.createOscillator()
-    const gain = context.createGain()
-    oscillator.type = 'triangle'
-    oscillator.frequency.value = frequency
-    gain.gain.setValueAtTime(0.0001, cursor)
-    gain.gain.exponentialRampToValueAtTime(0.12, cursor + 0.025)
-    gain.gain.exponentialRampToValueAtTime(0.0001, cursor + duration - 0.03)
-    oscillator.connect(gain)
-    gain.connect(context.destination)
-    oscillator.start(cursor)
-    oscillator.stop(cursor + duration)
-    cursor += duration + 0.045
-  })
-
-  return Math.max(1000, (cursor - context.currentTime + 0.8) * 1000)
-}
-
 function BackButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button className="back-button" type="button" onClick={onClick} aria-label={label}>
@@ -186,7 +175,13 @@ function GalleryPhotoPage({ pageIndex }: { pageIndex: number }) {
   return (
     <div className="gallery-photo-sheet" data-gallery-page={pageIndex + 1}>
       <figure className="gallery-polaroid">
-        <img className="gallery-photo" src={memory.src} alt={memory.alt} />
+        <img
+          className="gallery-photo"
+          src={memory.src}
+          alt={memory.alt}
+          decoding="async"
+          fetchPriority="high"
+        />
         <figcaption className="gallery-caption">
           {memory.caption}
           <Heart size={14} fill="currentColor" aria-hidden="true" />
@@ -202,7 +197,6 @@ function GalleryPhotoPage({ pageIndex }: { pageIndex: number }) {
 function App() {
   const [view, setView] = useState<View>('intro')
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false)
   const [wishMade, setWishMade] = useState(false)
   const [giftRevealed, setGiftRevealed] = useState(false)
   const [wishEffectId, setWishEffectId] = useState(0)
@@ -212,8 +206,7 @@ function App() {
   const mainRef = useRef<HTMLElement>(null)
   const navRef = useRef<HTMLElement>(null)
   const navToggleRef = useRef<HTMLButtonElement>(null)
-  const audioContextRef = useRef<AudioContext | null>(null)
-  const melodyTimerRef = useRef<number | null>(null)
+  const previousViewRef = useRef<View>(view)
   const wishTimerRef = useRef<number | null>(null)
 
   const clearWishTimer = () => {
@@ -223,11 +216,20 @@ function App() {
   }
 
   const goTo = (nextView: View) => {
-    clearWishTimer()
     const isSameView = nextView === view
+
+    setMobileNavOpen(false)
+    if (isSameView) {
+      window.requestAnimationFrame(() => {
+        mainRef.current?.scrollTo(0, 0)
+        mainRef.current?.focus({ preventScroll: true })
+      })
+      return
+    }
+
+    clearWishTimer()
     setIsLetterOpening(false)
     setView(nextView)
-    setMobileNavOpen(false)
     setGalleryFlip(null)
     if (nextView === 'gallery') setGalleryPage(0)
     if (nextView !== 'cake') {
@@ -235,18 +237,12 @@ function App() {
       setGiftRevealed(false)
     }
 
-    if (isSameView) {
-      window.requestAnimationFrame(() => {
-        mainRef.current?.scrollTo(0, 0)
-        mainRef.current?.focus({ preventScroll: true })
-      })
-    }
   }
 
   const openLetter = () => {
     if (isLetterOpening) return
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (prefersReducedMotion()) {
       goTo('message-letter')
       return
     }
@@ -260,7 +256,7 @@ function App() {
     setWishMade(true)
     setGiftRevealed(false)
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (prefersReducedMotion()) {
       setGiftRevealed(true)
       return
     }
@@ -278,7 +274,7 @@ function App() {
     const target = galleryPage + (direction === 'next' ? 1 : -1)
     if (target < 0 || target >= galleryMemories.length) return
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (prefersReducedMotion()) {
       setGalleryPage(target)
       return
     }
@@ -300,47 +296,12 @@ function App() {
     }
   }
 
-  const stopMusic = async () => {
-    if (melodyTimerRef.current !== null) {
-      window.clearTimeout(melodyTimerRef.current)
-      melodyTimerRef.current = null
-    }
-    const context = audioContextRef.current
-    audioContextRef.current = null
-    if (context && context.state !== 'closed') await context.close()
-    setIsMusicPlaying(false)
-  }
-
-  const startMusic = async () => {
-    const AudioContextClass =
-      window.AudioContext ??
-      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
-
-    if (!AudioContextClass) return
-
-    const context = new AudioContextClass()
-    audioContextRef.current = context
-    await context.resume()
-
-    const playLoop = () => {
-      const wait = scheduleMelody(context)
-      melodyTimerRef.current = window.setTimeout(playLoop, wait)
-    }
-
-    playLoop()
-    setIsMusicPlaying(true)
-  }
-
-  const toggleMusic = () => {
-    if (isMusicPlaying) {
-      void stopMusic()
-    } else {
-      void startMusic()
-    }
-  }
-
   useEffect(() => {
     document.title = `${viewLabels[view]} | Birthday Card`
+    const viewChanged = previousViewRef.current !== view
+    previousViewRef.current = view
+    if (!viewChanged) return
+
     mainRef.current?.scrollTo(0, 0)
     mainRef.current?.focus({ preventScroll: true })
   }, [view])
@@ -349,17 +310,16 @@ function App() {
     if (view !== 'gallery') return
 
     const nextMemory = galleryMemories[galleryPage + 1]
-    if (nextMemory) {
-      const image = new Image()
-      image.src = nextMemory.src
-    }
+    if (nextMemory) preloadImage(nextMemory.src)
   }, [galleryPage, view])
+
+  useEffect(() => {
+    if (giftRevealed) preloadImage(galleryMemories[0].src)
+  }, [giftRevealed])
 
   useEffect(
     () => () => {
-      if (melodyTimerRef.current !== null) window.clearTimeout(melodyTimerRef.current)
       if (wishTimerRef.current !== null) window.clearTimeout(wishTimerRef.current)
-      void audioContextRef.current?.close()
     },
     [],
   )
@@ -408,6 +368,17 @@ function App() {
           ref={navRef}
           className={`nav ${mobileNavOpen ? 'nav--open' : ''}`}
           aria-label="Điều hướng thiệp"
+          onBlur={(event) => {
+            if (!mobileNavOpen) return
+            const nextTarget = event.relatedTarget
+            if (
+              nextTarget instanceof Node &&
+              (event.currentTarget.contains(nextTarget) || navToggleRef.current?.contains(nextTarget))
+            ) {
+              return
+            }
+            setMobileNavOpen(false)
+          }}
         >
           {navItems.map(({ label, view: itemView, icon: Icon }) => (
             <button
@@ -424,16 +395,6 @@ function App() {
         </nav>
 
         <div className="topbar__actions">
-          <button
-            className="icon-button"
-            type="button"
-            onClick={toggleMusic}
-            aria-label="Nhạc nền"
-            aria-pressed={isMusicPlaying}
-          >
-            {isMusicPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
-            <span className="tooltip">{isMusicPlaying ? 'Tắt nhạc' : 'Phát nhạc'}</span>
-          </button>
           <button
             ref={navToggleRef}
             className="icon-button nav-toggle"
@@ -461,48 +422,80 @@ function App() {
                 className="intro-decoration intro-decoration--roses-white"
                 src={introRosesWhiteImage}
                 alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
               <img
                 className="intro-decoration intro-decoration--peonies"
                 src={introPeoniesImage}
                 alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
               <img
                 className="intro-decoration intro-decoration--roses-kraft"
                 src={introRosesKraftImage}
                 alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
               <img
                 className="intro-decoration intro-decoration--gift"
                 src={introGiftImage}
                 alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
               <img
                 className="intro-decoration intro-decoration--bunny-white"
                 src={introBunnyWhiteImage}
                 alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
               <img
                 className="intro-decoration intro-decoration--bunny-plush"
                 src={introBunnyPlushImage}
                 alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
               <img
                 className="intro-decoration intro-decoration--love"
                 src={introLoveImage}
                 alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
               <img
                 className="intro-decoration intro-decoration--tulip-envelope"
                 src={introTulipEnvelopeImage}
                 alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
               />
             </div>
 
             <div className="intro-content">
               <h1 lang="en">Happy Birthday!</h1>
               <button className="envelope-trigger" type="button" onClick={() => goTo('menu')}>
-                <img className="intro-envelope-image" src={messageEnvelopeImage} alt="" />
+                <img
+                  className="intro-envelope-image"
+                  src={messageEnvelopeImage}
+                  alt=""
+                  width={1270}
+                  height={738}
+                  decoding="async"
+                  fetchPriority="high"
+                />
                 <span className="sr-only">Mở thiệp sinh nhật</span>
               </button>
               <p className="intro-signature" lang="en">for my favorite person</p>
@@ -643,13 +636,31 @@ function App() {
             </div>
 
             <div className="bouquet-layout">
-              {flowerNotes.map((note, index) => (
-                <p className={`wish-note wish-note--${index + 1}`} key={note}>
-                  {note}
-                  <Heart size={13} fill="currentColor" />
-                </p>
-              ))}
               <img className="bouquet-main" src={bouquetImage} alt="Bó hoa mẫu đơn và tulip màu hồng" />
+              {flowerNotes.map((note, index) => (
+                <article className={`wish-note wish-note--${index + 1}`} key={note}>
+                  <div className="wish-note__card">
+                    <img
+                      className="wish-note__paper"
+                      src={flowerNoteImage}
+                      alt=""
+                      width={856}
+                      height={535}
+                      decoding="async"
+                      aria-hidden="true"
+                    />
+                    <p className="wish-note__content">
+                      <span>{note}</span>
+                      <Heart
+                        className="wish-note__heart"
+                        size={14}
+                        fill="currentColor"
+                        aria-hidden="true"
+                      />
+                    </p>
+                  </div>
+                </article>
+              ))}
               <p className="bouquet-caption" lang="en">A bouquet made with love</p>
             </div>
             <BackButton onClick={back} label="Quay lại chọn bất ngờ" />
@@ -721,6 +732,11 @@ function App() {
               <p>Một góc nhỏ để cất những điều thật thương.</p>
             </div>
 
+            <article className="gallery-mobile-note" aria-label="Lời nhắn kỷ niệm">
+              <p className="gallery-mobile-note__title">{galleryNote.title}</p>
+              <p>{galleryNote.text}</p>
+            </article>
+
             <div
               className={`gallery-album ${galleryFlip ? 'is-turning' : ''}`}
               role="group"
@@ -757,11 +773,8 @@ function App() {
 
                 <article className="gallery-note">
                   <span className="gallery-stamp" lang="en">Forever loved</span>
-                  <p className="gallery-note__title">Gửi bạn của hôm nay,</p>
-                  <p className="gallery-note__text">
-                    Mong bạn luôn giữ được nét hồn nhiên ấy, và mỗi tuổi mới đều có thêm thật nhiều
-                    niềm vui.
-                  </p>
+                  <p className="gallery-note__title">{galleryNote.title}</p>
+                  <p className="gallery-note__text">{galleryNote.text}</p>
                   <Heart size={18} fill="currentColor" aria-hidden="true" />
                 </article>
               </div>
@@ -795,9 +808,8 @@ function App() {
                   className="gallery-page-trigger"
                   type="button"
                   onClick={() => changeGalleryPage('next')}
-                  aria-disabled={
-                    galleryFlip !== null || galleryPage === galleryMemories.length - 1
-                  }
+                  disabled={galleryFlip !== null || galleryPage === galleryMemories.length - 1}
+                  aria-disabled={galleryFlip !== null || galleryPage === galleryMemories.length - 1}
                   aria-label={
                     galleryPage === galleryMemories.length - 1
                       ? 'Đã đến ảnh cuối của album'
@@ -807,13 +819,12 @@ function App() {
               </div>
             </div>
 
-            <div className="gallery-navigation" aria-label="Điều khiển album">
+            <div className="gallery-navigation" role="group" aria-label="Điều khiển album">
               <button
                 className="gallery-navigation__button"
                 type="button"
                 onClick={() => changeGalleryPage('previous')}
-                disabled={galleryPage === 0}
-                aria-disabled={galleryFlip !== null || undefined}
+                disabled={galleryFlip !== null || galleryPage === 0}
                 aria-label="Xem ảnh trước"
               >
                 <ChevronLeft size={19} />
@@ -835,8 +846,7 @@ function App() {
                 className="gallery-navigation__button"
                 type="button"
                 onClick={() => changeGalleryPage('next')}
-                disabled={galleryPage === galleryMemories.length - 1}
-                aria-disabled={galleryFlip !== null || undefined}
+                disabled={galleryFlip !== null || galleryPage === galleryMemories.length - 1}
                 aria-label="Xem ảnh tiếp theo"
               >
                 <span>Sau</span>
@@ -859,7 +869,7 @@ function App() {
       </main>
 
       <footer className="footer-note">
-        <Music2 size={13} /> <span lang="en">made with love by cn.cnhwn_</span>
+        <Heart size={13} fill="currentColor" /> <span lang="en">made with love by cn.cnhwn_</span>
       </footer>
     </div>
   )
