@@ -105,14 +105,14 @@ const galleryMemories = [
     caption: 'Một chút tập trung, một chút đáng yêu.',
   },
   {
-    src: galleryImage07,
+    src: galleryImage08,
     alt: 'Ảnh kỷ niệm 7 của người nhận thiệp',
-    caption: 'Một khoảnh khắc bên nhau thật dịu dàng.',
+    caption: 'Những ngày cùng nhau luôn thật đáng nhớ.',
   },
   {
-    src: galleryImage08,
+    src: galleryImage07,
     alt: 'Ảnh kỷ niệm 8 của người nhận thiệp',
-    caption: 'Những ngày cùng nhau luôn thật đáng nhớ.',
+    caption: 'Một khoảnh khắc bên nhau thật dịu dàng.',
   },
 ] as const
 
