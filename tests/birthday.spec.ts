@@ -91,7 +91,7 @@ test('birthday card completes every interactive scene', async ({ page }, testInf
   await page.screenshot({ path: testInfo.outputPath('03-envelope.png') })
 
   await page.getByRole('button', { name: 'Mở lá thư' }).click()
-  await expect(page.getByText('Người thương à,')).toBeVisible()
+  await expect(page.locator('.letter-salutation')).toBeVisible()
   await settleScene(page)
   await page.screenshot({ path: testInfo.outputPath('04-letter.png') })
 
@@ -191,7 +191,7 @@ test('letter appears only after the envelope opens', async ({ page }) => {
   await expect(openButton).toBeDisabled()
   await expect(openButton).toHaveClass(/is-opening/)
   await expect(page.locator('.letter-view')).toHaveCount(0)
-  await expect(page.getByText('Người thương à,')).toBeVisible({ timeout: 2500 })
+  await expect(page.locator('.letter-salutation')).toBeVisible({ timeout: 2500 })
 })
 
 test('wish papers rise before they fall', async ({ page }, testInfo) => {
@@ -426,7 +426,7 @@ test('reduced motion changes gallery pages immediately without a flip layer', as
   await expect(turningPage).toHaveCount(0)
 })
 
-test('mobile navigation opens and reaches every destination', async ({ page }, testInfo) => {
+test('mobile navigation returns to visited destinations', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile-chrome', 'Mobile-only navigation coverage')
 
   await page.goto('/')
@@ -434,6 +434,15 @@ test('mobile navigation opens and reaches every destination', async ({ page }, t
   await menuButton.click()
   await expect(page.getByRole('navigation', { name: 'Điều hướng thiệp' })).toHaveClass(/nav--open/)
 
+  await page.getByRole('button', { name: 'Bất ngờ', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Choose Your Surprise' })).toBeVisible()
+  await page.getByRole('button', { name: 'Xem bó hoa', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Flowers for You' })).toBeVisible()
+  await menuButton.click()
+  await page.getByRole('button', { name: 'Bất ngờ', exact: true }).click()
+  await page.getByRole('button', { name: 'Xem bánh sinh nhật', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Ước một điều', exact: true })).toBeVisible()
+  await menuButton.click()
   await page.getByRole('button', { name: 'Bó hoa' }).click()
   await expect(page.getByRole('heading', { name: 'Flowers for You' })).toBeVisible()
 

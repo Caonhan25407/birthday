@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import {
   ArrowLeft,
   CakeSlice,
@@ -33,6 +33,7 @@ import introRosesKraftImage from './assets/intro-roses-kraft-cutout.webp'
 import introRosesWhiteImage from './assets/intro-roses-white-cutout.webp'
 import introTulipEnvelopeImage from './assets/intro-tulip-envelope-cutout.webp'
 import messageEnvelopeImage from './assets/message-envelope.webp'
+import PhotoGallery from './PhotoGallery'
 import './App.css'
 
 type View =
@@ -43,6 +44,7 @@ type View =
   | 'flowers'
   | 'cake'
   | 'gallery'
+  | 'photos'
 
 const viewLabels: Record<View, string> = {
   intro: 'Chúc mừng sinh nhật',
@@ -52,6 +54,7 @@ const viewLabels: Record<View, string> = {
   flowers: 'Bó hoa',
   cake: 'Bánh sinh nhật',
   gallery: 'Thư viện ảnh',
+  photos: 'Gallery ảnh',
 }
 
 const navItems: Array<{ label: string; view: View; icon: typeof Mail }> = [
@@ -59,58 +62,74 @@ const navItems: Array<{ label: string; view: View; icon: typeof Mail }> = [
   { label: 'Lời nhắn', view: 'message-envelope', icon: Mail },
   { label: 'Bó hoa', view: 'flowers', icon: Flower2 },
   { label: 'Bánh kem', view: 'cake', icon: CakeSlice },
+  { label: 'Gallery ảnh', view: 'photos', icon: Images },
 ]
 
+function getNavigationView(view: View): View {
+  if (view === 'intro') return 'menu'
+  if (view === 'message-letter') return 'message-envelope'
+  if (view === 'gallery') return 'photos'
+  return view
+}
+
 const flowerNotes = [
-  'Một bó hoa dành cho người đáng yêu nhất.',
+  'Tuổi mới, chúc em mọi điều như ý, nụ cười luôn trên môi.',
   'Mong mỗi ngày của bạn đều nở rộ niềm vui.',
-  'Dành cho người mình luôn trân quý.',
-  'Bạn xứng đáng với mọi điều dịu dàng trên đời.',
+  'Thêm tuổi mới rồi, mình cùng tạo thêm nhiều kỷ niệm đẹp nhé!',
+  'Chúc người anh thương luôn khỏe mạnh',
 ]
 
 const galleryNote = {
-  title: 'Gửi bạn của hôm nay,',
-  text: 'Mong bạn luôn giữ được nét hồn nhiên ấy, và mỗi tuổi mới đều có thêm thật nhiều niềm vui.',
+  title: 'Gửi Khánh Giang,',
+  text: 'Mong em luôn giữ được nét hồn nhiên ấy, và tuổi mới đều có thêm thật nhiều niềm vui.',
 }
 
 const galleryMemories = [
   {
     src: galleryImage01,
+    width: 1505, height: 1500,
     alt: 'Ảnh kỷ niệm 1 của người nhận thiệp',
     caption: 'Ngày ấy, bé xíu và thật đáng yêu.',
   },
   {
     src: galleryImage02,
+    width: 1179, height: 1180,
     alt: 'Ảnh kỷ niệm 2 của người nhận thiệp',
     caption: 'Lớn thêm một chút, vẫn nguyên nét hồn nhiên.',
   },
   {
     src: galleryImage03,
+    width: 1161, height: 1172,
     alt: 'Ảnh kỷ niệm 3 của người nhận thiệp',
-    caption: 'Nụ cười này, mình luôn muốn ngắm nhìn.',
+    caption: 'Nụ cười này, anh luôn muốn ngắm nhìn.',
   },
   {
     src: galleryImage04,
+    width: 1179, height: 1176,
     alt: 'Ảnh kỷ niệm 4 của người nhận thiệp',
     caption: 'Một chút tinh nghịch của hôm nay.',
   },
   {
     src: galleryImage05,
+    width: 1600, height: 1066,
     alt: 'Ảnh kỷ niệm 5 của người nhận thiệp',
     caption: 'Một ngày nắng đẹp và một dáng pose thật xinh.',
   },
   {
     src: galleryImage06,
+    width: 1440, height: 1440,
     alt: 'Ảnh kỷ niệm 6 của người nhận thiệp',
-    caption: 'Một chút tập trung, một chút đáng yêu.',
+    caption: 'Khoảnh khắc đáng yêu.',
   },
   {
     src: galleryImage08,
+    width: 1020, height: 1020,
     alt: 'Ảnh kỷ niệm 7 của người nhận thiệp',
     caption: 'Những ngày cùng nhau luôn thật đáng nhớ.',
   },
   {
     src: galleryImage07,
+    width: 1440, height: 1440,
     alt: 'Ảnh kỷ niệm 8 của người nhận thiệp',
     caption: 'Một khoảnh khắc bên nhau thật dịu dàng.',
   },
@@ -195,7 +214,11 @@ function GalleryPhotoPage({ pageIndex }: { pageIndex: number }) {
 }
 
 function App() {
-  const [view, setView] = useState<View>('intro')
+  const [view, setView] = useState<View>(() => window.location.hash === '#gallery' ? 'photos' : 'intro')
+  const [unlockedNavViews, setUnlockedNavViews] = useState<View[]>(() => {
+    const initialView = getNavigationView(view)
+    return initialView === 'menu' ? ['menu'] : ['menu', initialView]
+  })
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [wishMade, setWishMade] = useState(false)
   const [giftRevealed, setGiftRevealed] = useState(false)
@@ -209,15 +232,13 @@ function App() {
   const previousViewRef = useRef<View>(view)
   const wishTimerRef = useRef<number | null>(null)
 
-  const clearWishTimer = () => {
-    if (wishTimerRef.current === null) return
-    window.clearTimeout(wishTimerRef.current)
-    wishTimerRef.current = null
-  }
-
-  const goTo = (nextView: View) => {
+  const goTo = useCallback((nextView: View) => {
     const isSameView = nextView === view
 
+    setUnlockedNavViews((current) => {
+      const navigationView = getNavigationView(nextView)
+      return current.includes(navigationView) ? current : [...current, navigationView]
+    })
     setMobileNavOpen(false)
     if (isSameView) {
       window.requestAnimationFrame(() => {
@@ -227,9 +248,15 @@ function App() {
       return
     }
 
-    clearWishTimer()
+    if (wishTimerRef.current !== null) {
+      window.clearTimeout(wishTimerRef.current)
+      wishTimerRef.current = null
+    }
     setIsLetterOpening(false)
     setView(nextView)
+    if (nextView === 'photos' || window.location.hash === '#gallery') {
+      window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${nextView === 'photos' ? '#gallery' : ''}`)
+    }
     setGalleryFlip(null)
     if (nextView === 'gallery') setGalleryPage(0)
     if (nextView !== 'cake') {
@@ -237,7 +264,16 @@ function App() {
       setGiftRevealed(false)
     }
 
-  }
+  }, [view])
+
+  useEffect(() => {
+    const syncGalleryHash = () => {
+      if (window.location.hash === '#gallery') goTo('photos')
+      else if (view === 'photos') goTo('intro')
+    }
+    window.addEventListener('hashchange', syncGalleryHash)
+    return () => window.removeEventListener('hashchange', syncGalleryHash)
+  }, [goTo, view])
 
   const openLetter = () => {
     if (isLetterOpening) return
@@ -356,7 +392,7 @@ function App() {
     galleryFlip?.direction === 'next' ? galleryFlip.target : galleryPage
 
   return (
-    <div className="page-frame">
+    <div className={`page-frame${view === 'photos' ? ' page-frame--gallery' : ''}`}>
       <header className="topbar">
         <button className="brand" type="button" onClick={() => goTo('intro')}>
           <Heart size={14} fill="currentColor" />
@@ -380,7 +416,7 @@ function App() {
             setMobileNavOpen(false)
           }}
         >
-          {navItems.map(({ label, view: itemView, icon: Icon }) => (
+          {navItems.filter((item) => unlockedNavViews.includes(item.view)).map(({ label, view: itemView, icon: Icon }) => (
             <button
               className={isNavActive(itemView) ? 'is-active' : ''}
               type="button"
@@ -498,7 +534,7 @@ function App() {
                 />
                 <span className="sr-only">Mở thiệp sinh nhật</span>
               </button>
-              <p className="intro-signature" lang="en">for my favorite person</p>
+              <p className="intro-signature" lang="en">for my darling</p>
             </div>
           </section>
         )}
@@ -508,7 +544,7 @@ function App() {
             <div className="section-heading section-heading--light">
               <Sparkles size={19} />
               <h1 lang="en">Choose Your Surprise</h1>
-              <p>Ba món quà nhỏ, thật nhiều yêu thương.</p>
+
             </div>
 
             <div className="surprise-grid">
@@ -558,7 +594,7 @@ function App() {
         {view === 'message-envelope' && (
           <section className="message-view scene-enter">
             <div className={`message-envelope-wrap ${isLetterOpening ? 'is-opening' : ''}`}>
-              <h1 className="eyebrow">Có một lá thư dành cho bạn</h1>
+              <h1 className="eyebrow">Anh có lá thư dành tặng em!</h1>
               <button
                 className={`open-letter-button ${isLetterOpening ? 'is-opening' : ''}`}
                 type="button"
@@ -604,21 +640,18 @@ function App() {
               <span className="paper-tape paper-tape--left" aria-hidden="true" />
               <span className="paper-tape paper-tape--right" aria-hidden="true" />
               <div className="letter-card__inner">
-                <p className="letter-salutation">Người thương à,</p>
+                <p className="letter-salutation">Gửi Khánh Giang yêu dấu,</p>
                 <p>
-                  Hôm nay là ngày đặc biệt của bạn, nhưng mình lại là người nhận được món quà lớn
-                  nhất: được có bạn trong đời.
+                  Chúc mừng sinh nhật em bé của anh!
                 </p>
                 <p>
-                  Mỗi nụ cười của bạn làm ngày thường trở nên rực rỡ, và từng khoảnh khắc bên nhau
-                  đều hóa thành một kỷ niệm thật đẹp.
+                  Có những người xuất hiện khiến cuộc sống trở nên ngập tràn màu sắc, và với anh, người đó chính là Khánh Giang.
+                  Chúc em tuổi 19 nhiều may mắn, thật trọn vẹn, chỉ có những nụ cười, thật nhiều niềm vui. 
+                  Chúc cho những mục tiêu, hoài bão và ước mơ em đang ấp ủ đều sẽ từng bước trở thành hiện thực.
+                  Thanh xuân của em tựa như một thước phim đẹp, và anh thật may mắn khi được là người cùng em viết nên những thước phim rực rỡ nhất.
                 </p>
-                <p>
-                  Mong tuổi mới mang đến cho bạn thật nhiều bình yên, những hành trình đáng nhớ và
-                  tất cả những yêu thương mà bạn xứng đáng được nhận.
-                </p>
-                <p className="letter-wish">Chúc mừng sinh nhật, người mình yêu!</p>
-                <p className="letter-signoff">Thương bạn, hôm nay và thật nhiều ngày về sau.</p>
+                <p className="letter-wish">Chúc mừng sinh nhật, em yêuuuu!</p>
+                <p className="letter-signoff">Caonhann</p>
               </div>
               <span className="ribbon-bow ribbon-bow--left" aria-hidden="true" />
               <span className="ribbon-bow ribbon-bow--right" aria-hidden="true" />
@@ -722,6 +755,10 @@ function App() {
             </p>
             <BackButton onClick={back} label="Quay lại chọn bất ngờ" />
           </section>
+        )}
+
+        {view === 'photos' && (
+          <PhotoGallery memories={galleryMemories} />
         )}
 
         {view === 'gallery' && (
