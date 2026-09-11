@@ -1,0 +1,281 @@
+/* A paper-and-envelope composition, scoped to the opening scene. */
+.intro-view--collage {
+  padding: 48px 28px;
+  display: grid;
+  place-items: center;
+  background-image: radial-gradient(ellipse at 50% 45%, #fff8ed65, transparent 65%);
+}
+
+.intro-view--collage .intro-content {
+  width: min(880px, 78%);
+  max-width: none;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.08fr 1fr;
+  align-items: center;
+  translate: none;
+}
+
+.intro-note {
+  width: 100%;
+  min-width: 0;
+  min-height: 410px;
+  padding: 54px 20px 42px;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  color: var(--burgundy-deep);
+  background: #fff8ed;
+  background-image: repeating-linear-gradient(0deg, transparent 0 3px, #ac815506 3px 4px);
+  border: 1px solid #ae795226;
+  box-shadow: 0 20px 40px #63273b24, inset 0 0 45px #d0a47812;
+  rotate: -6deg;
+}
+
+.intro-note::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 1px solid #9d59622b;
+  pointer-events: none;
+}
+
+.intro-note__tape {
+  width: 116px;
+  height: 33px;
+  position: absolute;
+  top: -15px;
+  left: calc(50% - 58px);
+  background: #e8c594b8;
+  background-image: repeating-linear-gradient(90deg, #fff5db20 0 3px, transparent 3px 8px);
+  box-shadow: 0 2px 3px #78523412;
+  clip-path: polygon(0 7%, 98% 0, 100% 88%, 2% 100%);
+  rotate: 3deg;
+}
+
+.intro-dedication {
+  margin: 0;
+  font-family: var(--font-script);
+  font-size: 23px;
+  color: #8c4e59;
+}
+
+.intro-view--collage .intro-content h1 {
+  margin: 20px 0 0;
+  font-size: inherit;
+  line-height: 1;
+  white-space: normal;
+  text-shadow: none;
+}
+
+.intro-title__first {
+  display: block;
+  padding-left: 0.28em;
+  font-family: var(--font-serif);
+  font-size: 31px;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.intro-title__last {
+  display: block;
+  margin-top: 2px;
+  padding: 0 8px 12px;
+  font-size: clamp(64px, 6.4vw, 92px);
+  line-height: 1.2;
+}
+
+.intro-view--collage .intro-signature {
+  margin: 10px 0 0;
+  font-size: 22px;
+  color: #9b5864;
+}
+
+.intro-note__heart {
+  margin-top: 22px;
+  rotate: 12deg;
+}
+
+.intro-invitation {
+  width: 108%;
+  min-width: 0;
+  margin-top: 120px;
+  margin-left: -28px;
+  position: relative;
+  z-index: 2;
+  rotate: 7deg;
+}
+
+.intro-view--collage .envelope-trigger {
+  width: 100%;
+  margin: 0;
+}
+
+.intro-view--collage .intro-envelope-image {
+  width: 100%;
+  max-width: none;
+  filter: drop-shadow(0 4px 2px #6b342820) drop-shadow(0 24px 15px #67213935);
+}
+
+.intro-open-hint {
+  margin: 28px 0 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--burgundy-deep);
+  font-family: var(--font-script);
+  font-size: 22px;
+  rotate: -7deg;
+}
+
+.intro-open-hint svg { rotate: 65deg; }
+
+.intro-view--collage .intro-decoration--roses-white {
+  width: 280px;
+  top: -86px;
+  left: -64px;
+}
+.intro-view--collage .intro-decoration--peonies {
+  width: 280px;
+  bottom: -62px;
+  left: 5%;
+}
+.intro-view--collage .intro-decoration--roses-kraft,
+.intro-view--collage .intro-decoration--bunny-white { display: none; }
+.intro-view--collage .intro-decoration--gift {
+  width: 112px;
+  top: 10%;
+  right: 14%;
+  left: auto;
+}
+.intro-view--collage .intro-decoration--bunny-plush {
+  width: 152px;
+  bottom: 4%;
+  right: 15%;
+  left: auto;
+}
+.intro-view--collage .intro-decoration--love {
+  --decor-opacity: 0.54;
+  width: 150px;
+  top: 10%;
+  left: 20%;
+  bottom: auto;
+  translate: none;
+}
+.intro-view--collage .intro-decoration--tulip-envelope {
+  width: 240px;
+  top: -30px;
+  right: -42px;
+  bottom: auto;
+}
+
+@media (max-width: 960px) and (orientation: portrait) {
+  .intro-view--collage { padding: 52px 24px 104px; }
+  .intro-view--collage .intro-content {
+    width: min(420px, 100%);
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .intro-note {
+    min-height: 320px;
+    padding: 36px 16px 62px;
+    rotate: -5deg;
+  }
+  .intro-dedication { font-size: 21px; }
+  .intro-view--collage .intro-content h1 { margin-top: 14px; }
+  .intro-title__first { font-size: 24px; }
+  .intro-title__last { font-size: clamp(59px, 18vw, 76px); }
+  .intro-view--collage .intro-signature { margin-top: 0; font-size: 20px; }
+  .intro-note__heart { margin-top: 14px; width: 18px; }
+  .intro-invitation {
+    width: 96%;
+    margin: -48px 0 0 18px;
+    rotate: 7deg;
+  }
+  .intro-open-hint { margin: 23px 0 0; font-size: 20px; }
+  .intro-view--collage .intro-decoration--roses-white {
+    width: 150px;
+    top: -61px;
+    left: -44px;
+  }
+  .intro-view--collage .intro-decoration--peonies {
+    display: block;
+    width: 198px;
+    bottom: -30px;
+    left: -58px;
+  }
+  .intro-view--collage .intro-decoration--gift {
+    display: block;
+    width: 82px;
+    top: 3%;
+    right: 1%;
+  }
+  .intro-view--collage .intro-decoration--bunny-plush {
+    width: 114px;
+    right: 6%;
+    bottom: 12px;
+  }
+  .intro-view--collage .intro-decoration--love { display: none; }
+  .intro-view--collage .intro-decoration--tulip-envelope {
+    width: 126px;
+    top: auto;
+    right: -48px;
+    bottom: -30px;
+  }
+}
+
+@media (max-width: 760px) and (max-height: 700px) and (orientation: portrait) {
+  .intro-view--collage { padding: 24px 27px 28px; }
+  .intro-view--collage .intro-content { width: min(290px, 100%); }
+  .intro-note { min-height: 264px; padding: 24px 12px 48px; }
+  .intro-dedication { font-size: 18px; }
+  .intro-title__first { font-size: 20px; }
+  .intro-title__last { font-size: 58px; padding-bottom: 8px; }
+  .intro-view--collage .intro-signature { font-size: 18px; }
+  .intro-note__heart { display: none; }
+  .intro-invitation { margin-top: -38px; }
+  .intro-open-hint { margin-top: 18px; font-size: 18px; }
+  .intro-view--collage .intro-decoration--peonies { width: 130px; bottom: -26px; left: -32px; }
+  .intro-view--collage .intro-decoration--bunny-plush { width: 78px; bottom: 1px; right: 4%; }
+  .intro-view--collage .intro-decoration--gift { width: 62px; top: 1%; right: 0; }
+  .intro-view--collage .intro-decoration--tulip-envelope { display: none; }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  .intro-view--collage { padding: 18px 30px; }
+  .intro-view--collage .intro-content { width: min(650px, 78%); }
+  .intro-note { min-height: 234px; padding: 20px 14px; }
+  .intro-dedication { font-size: 18px; }
+  .intro-view--collage .intro-content h1 { margin-top: 10px; }
+  .intro-title__first { font-size: 20px; }
+  .intro-title__last { font-size: 60px; padding-bottom: 8px; }
+  .intro-view--collage .intro-signature { font-size: 18px; margin-top: 0; }
+  .intro-note__heart { margin-top: 10px; width: 16px; height: 16px; }
+  .intro-invitation { margin-top: 35px; }
+  .intro-open-hint { margin-top: 18px; font-size: 18px; }
+  .intro-view--collage .intro-decoration--peonies { width: 168px; bottom: -60px; left: -42px; }
+  .intro-view--collage .intro-decoration--bunny-plush { width: 90px; bottom: -12px; right: 4%; }
+  .intro-view--collage .intro-decoration--gift,
+  .intro-view--collage .intro-decoration--love { display: none; }
+  .intro-view--collage .intro-decoration--roses-white { width: 150px; top: -70px; left: -52px; }
+  .intro-view--collage .intro-decoration--tulip-envelope { width: 145px; top: -25px; right: -45px; }
+}
+
+@media (max-width: 680px) and (max-height: 400px) and (orientation: landscape) {
+  .intro-view--collage .intro-content { width: 84%; }
+  .intro-note {
+    min-height: min(200px, calc(100dvh - 120px));
+    padding: 16px 12px;
+  }
+  .intro-dedication { font-size: 16px; }
+  .intro-view--collage .intro-content h1 { margin-top: 8px; }
+  .intro-title__first { font-size: 18px; }
+  .intro-title__last { font-size: clamp(36px, 7.5vw, 50px); }
+  .intro-view--collage .intro-signature { font-size: 16px; }
+  .intro-note__heart { display: none; }
+  .intro-invitation { width: 100%; margin-top: 18px; margin-left: -12px; }
+  .intro-open-hint { margin: 14px 0 0; font-size: 17px; }
+}

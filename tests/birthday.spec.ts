@@ -1,7 +1,13 @@
 import { expect, test, type Page } from '@playwright/test'
 
 async function settleScene(page: Page) {
-  await page.waitForTimeout(1000)
+  await page.evaluate(async () => {
+    await document.fonts.ready
+    const animations = document.getAnimations().filter(
+      (animation) => animation.effect?.getComputedTiming().iterations !== Infinity,
+    )
+    await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)))
+  })
   const horizontalOverflow = await page.locator('.scene').evaluate(
     (element) => element.scrollWidth - element.clientWidth,
   )
@@ -195,7 +201,10 @@ test('letter appears only after the envelope opens', async ({ page }) => {
 })
 
 test('wish papers rise before they fall', async ({ page }, testInfo) => {
+  const initialTime = new Date('2026-08-25T00:00:00Z')
+  await page.clock.install({ time: initialTime })
   const wishButton = await openCake(page)
+  await page.clock.pauseAt(new Date(initialTime.getTime() + 60_000))
   await wishButton.click()
 
   const papers = page.locator('.confetti i')
@@ -203,7 +212,20 @@ test('wish papers rise before they fall', async ({ page }, testInfo) => {
   await expect(papers).toHaveCount(78)
   await expect(giftButton).toHaveCount(0)
 
-  await page.waitForTimeout(780)
+  // Sample the actual CSS animation at fixed times so screenshot latency
+  // cannot let the four-second gift timer remove the confetti mid-check.
+  const sampleAnimation = async (time: number) => {
+    const count = await papers.evaluateAll((elements, currentTime) => {
+      const animations = elements.flatMap((element) => element.getAnimations())
+      animations.forEach((animation) => {
+        animation.pause()
+        animation.currentTime = currentTime
+      })
+      return animations.length
+    }, time)
+    expect(count).toBe(78)
+  }
+  await sampleAnimation(780)
   const risingCount = await papers.evaluateAll((elements) => {
     const container = elements[0]?.parentElement?.getBoundingClientRect()
     if (!container) return 0
@@ -215,7 +237,7 @@ test('wish papers rise before they fall', async ({ page }, testInfo) => {
   expect(risingCount).toBeGreaterThan(10)
   await page.screenshot({ path: testInfo.outputPath('wish-papers-rising.png') })
 
-  await page.waitForTimeout(1300)
+  await sampleAnimation(2080)
   const fallingCount = await papers.evaluateAll((elements) => {
     const container = elements[0]?.parentElement?.getBoundingClientRect()
     if (!container) return 0

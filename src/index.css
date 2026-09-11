@@ -37,6 +37,8 @@ html {
   min-width: 320px;
   min-height: 100%;
   background: #341d1a;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -92,6 +94,7 @@ a:focus-visible {
 
 @media (max-width: 760px) {
   #root {
+    min-height: 100dvh;
     padding: 0;
   }
 }

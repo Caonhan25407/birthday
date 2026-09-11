@@ -35,6 +35,7 @@ import introTulipEnvelopeImage from './assets/intro-tulip-envelope-cutout.webp'
 import messageEnvelopeImage from './assets/message-envelope.webp'
 import PhotoGallery from './PhotoGallery'
 import './App.css'
+import './Intro.css'
 
 type View =
   | 'intro'
@@ -74,7 +75,7 @@ function getNavigationView(view: View): View {
 
 const flowerNotes = [
   'Tuổi mới, chúc em mọi điều như ý, nụ cười luôn trên môi.',
-  'Mong mỗi ngày của bạn đều nở rộ niềm vui.',
+  'Mong mỗi ngày của em đều nở rộ niềm vui.',
   'Thêm tuổi mới rồi, mình cùng tạo thêm nhiều kỷ niệm đẹp nhé!',
   'Chúc người anh thương luôn khỏe mạnh',
 ]
@@ -452,7 +453,7 @@ function App() {
         aria-label={viewLabels[view]}
       >
         {view === 'intro' && (
-          <section className="intro-view scene-enter">
+          <section className="intro-view intro-view--collage scene-enter">
             <div className="intro-decorations" aria-hidden="true">
               <img
                 className="intro-decoration intro-decoration--roses-white"
@@ -521,20 +522,34 @@ function App() {
             </div>
 
             <div className="intro-content">
-              <h1 lang="en">Happy Birthday!</h1>
-              <button className="envelope-trigger" type="button" onClick={() => goTo('menu')}>
-                <img
-                  className="intro-envelope-image"
-                  src={messageEnvelopeImage}
-                  alt=""
-                  width={1270}
-                  height={738}
-                  decoding="async"
-                  fetchPriority="high"
-                />
-                <span className="sr-only">Mở thiệp sinh nhật</span>
-              </button>
-              <p className="intro-signature" lang="en">for my darling</p>
+              <div className="intro-note">
+                <span className="intro-note__tape" aria-hidden="true" />
+                <p className="intro-dedication">Gửi Khánh Giang</p>
+                <h1 lang="en" aria-label="Happy Birthday!">
+                  <span className="intro-title__first">Happy</span>
+                  <span className="intro-title__last">Birthday!</span>
+                </h1>
+                <p className="intro-signature" lang="en">for my darling</p>
+                <Heart className="intro-note__heart" size={22} strokeWidth={1.3} aria-hidden="true" />
+              </div>
+              <div className="intro-invitation">
+                <button className="envelope-trigger" type="button" onClick={() => goTo('menu')}>
+                  <img
+                    className="intro-envelope-image"
+                    src={messageEnvelopeImage}
+                    alt=""
+                    width={1270}
+                    height={738}
+                    decoding="async"
+                    fetchPriority="high"
+                  />
+                  <span className="sr-only">Mở thiệp sinh nhật</span>
+                </button>
+                <p className="intro-open-hint" aria-hidden="true">
+                  <ArrowLeft size={27} strokeWidth={1.3} />
+                  Chạm để mở thiệp
+                </p>
+              </div>
             </div>
           </section>
         )}

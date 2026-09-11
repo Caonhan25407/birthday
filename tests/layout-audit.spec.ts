@@ -8,6 +8,7 @@ const viewports = [
   { name: 'mobile', width: 390, height: 844 },
   { name: 'mobile-small', width: 320, height: 568 },
   { name: 'mobile-landscape', width: 844, height: 390 },
+  { name: 'mobile-landscape-small', width: 568, height: 320 },
 ]
 
 async function settle(page: Page) {
@@ -25,6 +26,13 @@ async function settle(page: Page) {
         if (image.naturalWidth > 0) await image.decode().catch(() => undefined)
       }),
     )
+  })
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+    const animations = document.getAnimations().filter(
+      (animation) => animation.effect?.getComputedTiming().iterations !== Infinity,
+    )
+    await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)))
   })
 }
 
@@ -47,6 +55,20 @@ async function auditScene(page: Page, viewportName: string, sceneName: string, t
     }
     if (frameRect.top < -1 || frameRect.bottom > window.innerHeight + 1) {
       problems.push(`Page frame exceeds viewport vertically: ${frameRect.top}..${frameRect.bottom}`)
+    }
+
+    const introEnvelope = scene.querySelector('.envelope-trigger')
+    if (introEnvelope) {
+      const envelopeRect = introEnvelope.getBoundingClientRect()
+      scene.querySelectorAll('.intro-title__first, .intro-title__last, .intro-dedication, .intro-signature').forEach((element) => {
+        const range = document.createRange()
+        range.selectNodeContents(element)
+        const rect = range.getBoundingClientRect()
+        if (rect.left < envelopeRect.right && rect.right > envelopeRect.left &&
+            rect.top < envelopeRect.bottom && rect.bottom > envelopeRect.top) {
+          problems.push(`Envelope covers intro text: ${element.textContent}`)
+        }
+      })
     }
 
     document.querySelectorAll<HTMLImageElement>('img').forEach((image) => {
@@ -276,18 +298,21 @@ test('mobile navigation manages visibility, focus, and current page', async ({ p
 
 test('new scenes start at the top after navigating from scrolled content', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
 
   const scene = page.locator('.scene')
   await page.locator('.envelope-trigger').click()
+  await page.locator('.surprise-choice').nth(1).click()
+  await expect(page.locator('.flowers-heading')).toBeVisible()
   await scene.evaluate((element) => element.scrollTo(0, element.scrollHeight))
   expect(await scene.evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
 
-  await page.locator('.surprise-choice').nth(2).click()
-  await expect(page.locator('.cake-heading')).toBeVisible()
+  await page.locator('.back-button').click()
+  await expect(page.locator('.menu-view')).toBeVisible()
   await expect.poll(() => scene.evaluate((element) => element.scrollTop)).toBe(0)
 
   const sceneTop = await scene.evaluate((element) => element.getBoundingClientRect().top)
-  const headingTop = await page.locator('.cake-heading').evaluate((element) => element.getBoundingClientRect().top)
+  const headingTop = await page.locator('.menu-view .section-heading').evaluate((element) => element.getBoundingClientRect().top)
   expect(headingTop).toBeGreaterThanOrEqual(sceneTop)
 })
